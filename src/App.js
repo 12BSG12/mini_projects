@@ -1,36 +1,65 @@
 import React from 'react';
 import './index.scss';
 
-const ModalWindow = ({open, closeModalWindow, children }) => {
-  const show = open ? 'show': '';
-  return(
-    <div className={`overlay animated ${show}`}>
-      <div className="modal">
-        <svg height="200" viewBox="0 0 200 200" width="200" onClick={closeModalWindow}>
-          <title />
-          <path d="M114,100l49-49a9.9,9.9,0,0,0-14-14L100,86,51,37A9.9,9.9,0,0,0,37,51l49,49L37,149a9.9,9.9,0,0,0,14,14l49-49,49,49a9.9,9.9,0,0,0,14-14Z" />
-        </svg>
-        {children} 
-      </div>
+const questions = [
+  {
+    title: 'React - это ... ?',
+    variants: ['библиотека', 'фреймворк', 'приложение'],
+    correct: 0,
+  },
+  {
+    title: 'Компонент - это ... ',
+    variants: ['приложение', 'часть приложения или страницы', 'то, что я не знаю что такое'],
+    correct: 1,
+  },
+  {
+    title: 'Что такое JSX?',
+    variants: [
+      'Это простой HTML',
+      'Это функция',
+      'Это тот же HTML, но с возможностью выполнять JS-код',
+    ],
+    correct: 2,
+  },
+];
+
+function Result({correctAnswersCount}) {
+  return (
+    <div className="result">
+      <img src="https://cdn-icons-png.flaticon.com/512/2278/2278992.png" />
+      <h2>Вы отгадали {correctAnswersCount} ответа из {questions.length}</h2>
+      <a href='/'>
+        <button>Попробовать снова</button>
+      </a>
     </div>
   );
 }
 
-const App = () => {
-  const[open, setOpen] = React.useState(false);
-  const openModalWindow = () => {
-    setOpen(true)
+function Game({step, onClickVariant}) {
+  const percent = Math.round(step / questions.length * 100)
+  return (
+    <>
+      <div className="progress">
+        <div style={{ width: `${percent}%` }} className="progress__inner"></div>
+      </div>
+      <h1>{questions[step].title}</h1>
+      <ul>{questions[step].variants.map((item, index) => <li onClick={() => onClickVariant(index)} key={item}>{item}</li>)}
+      </ul>
+    </>
+  );
+}
+
+function App() {
+  const [step, setStep] = React.useState(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = React.useState(0);
+  const onClickVariant = (index) => {
+    if(questions[step].correct === index) setCorrectAnswersCount(correctAnswersCount + 1);
+    setStep(step + 1)
   }
-  const closeModalWindow = () => {
-    setOpen(false)
-  }
+  const showQuiz = step !== questions.length ? <Game step={step} onClickVariant={onClickVariant}/>: <Result correctAnswersCount={correctAnswersCount}/>;
   return (
     <div className="App">
-      <button className="open-modal-btn" onClick={openModalWindow}>✨ Открыть окно</button>
-      <ModalWindow open={open} closeModalWindow={closeModalWindow}>
-        <img src="https://media2.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif" />
-        <h3>title</h3>
-      </ModalWindow>
+      {showQuiz}
     </div>
   );
 }
