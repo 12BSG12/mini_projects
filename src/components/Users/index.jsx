@@ -2,7 +2,7 @@ import React from 'react';
 import { Skeleton } from './Skeleton';
 import { User } from './User';
 
-export const Users = ({search, handlechange, items, isLoading}) => {
+export const Users = ({search, handlechange, items, isLoading, onClickInvite, invites, onClickSuccess}) => {
   return (
     <>
       <div className="search">
@@ -22,10 +22,10 @@ export const Users = ({search, handlechange, items, isLoading}) => {
           {items.filter(item => {
             const fullName = (item.first_name + ' ' + item.last_name).toLowerCase();
             return fullName.includes(search.toLowerCase()) || item.email.toLowerCase().includes(search.toLowerCase());
-          }).map((item) => <User {...item} key={item.id}/>)}
+          }).map((item) => <User {...item} key={item.id} onClickInvite={onClickInvite} isInvited={invites.includes(item.id) && true}/>)}
         </ul>
       )}
-      <button className="send-invite-btn">Отправить приглашение</button>
+      <button className="send-invite-btn" disabled={invites.length === 0} onClick={onClickSuccess}>Отправить приглашение</button>
     </>
   );
 };
