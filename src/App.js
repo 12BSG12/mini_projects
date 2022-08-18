@@ -16,34 +16,45 @@ function Collection({ name, images }) {
 }
 
 function App() {
+  const tagsArray = ['Все','Горы','Море','Архитектура','Города'];
+  const pageArray = [];
+
+  const [tag, setTag] = React.useState('Все');
+  const [value, setValue] = React.useState('');
+  const [page, setPage] = React.useState(1);
+
+  const [photos, setPhotos] = React.useState([]);
+
+  for (let i = 1; i <= photos.length; i++) {
+    pageArray.push(i);
+  }
+
+  React.useEffect(() => {
+    fetch('https://62fe7bf241165d66bfc10d04.mockapi.io/photos')
+    .then(response => response.json()).then(data => setPhotos(data)).catch(err => console.log(err));
+  }, [])
+
   return (
     <div className="App">
       <h1>Моя коллекция фотографий</h1>
       <div className="top">
         <ul className="tags">
-          <li className="active">Все</li>
-          <li>Горы</li>
-          <li>Море</li>
-          <li>Архитектура</li>
-          <li>Города</li>
+          {
+            tagsArray.map((item, index) => <li className={ item === tag ? 'active' : ''} key={index} onClick={() => setTag(item)}>{item}</li>)
+          }
         </ul>
-        <input className="search-input" placeholder="Поиск по названию" />
+        <input className="search-input" value={value} onBlur={() => setValue('')} onChange={(e) => setValue(e.target.value)} placeholder="Поиск по названию" />
       </div>
       <div className="content">
-        <Collection
-          name="Путешествие по миру"
-          images={[
-            'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTN8fGNpdHl8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60',
-            'https://images.unsplash.com/photo-1560840067-ddcaeb7831d2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NDB8fGNpdHl8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60',
-            'https://images.unsplash.com/photo-1531219572328-a0171b4448a3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mzl8fGNpdHl8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60',
-            'https://images.unsplash.com/photo-1573108724029-4c46571d6490?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MzR8fGNpdHl8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60',
-          ]}
-        />
+        {
+          photos.filter(item => item.name.toLowerCase().includes(value.toLowerCase() || (tag === 'Все' ? '' : tag.toLowerCase())))
+          .map((item, index) => <Collection name={item.name} images={item.photos} key={index}/>)
+        }
       </div>
       <ul className="pagination">
-        <li>1</li>
-        <li className="active">2</li>
-        <li>3</li>
+        {
+          pageArray.map(item => <li className={item === page ? 'active' : ''} key={item} onClick={() => setPage(item)}>{item}</li>)
+        }
       </ul>
     </div>
   );
