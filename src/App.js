@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.scss';
+import ImageLoader from './Skeleton';
 
 function Collection({ name, images }) {
   return (
@@ -16,23 +17,29 @@ function Collection({ name, images }) {
 }
 
 function App() {
-  const tagsArray = ['Все','Горы','Море','Архитектура','Города'];
-  const pageArray = [];
+  const cats =  [
+    { "name": "Все" },
+    { "name": "Море" },
+    { "name": "Горы" },
+    { "name": "Архитектура" },
+    { "name": "Города" }
+  ];
 
-  const [tag, setTag] = React.useState('Все');
+  const [categoryId, setСategoryId] = React.useState(0);
   const [value, setValue] = React.useState('');
   const [page, setPage] = React.useState(1);
-
+  const [isLoading, setLoading] = React.useState(true)
   const [photos, setPhotos] = React.useState([]);
-
-  for (let i = 1; i <= photos.length; i++) {
-    pageArray.push(i);
-  }
-
+  
   React.useEffect(() => {
-    fetch('https://62fe7bf241165d66bfc10d04.mockapi.io/photos')
-    .then(response => response.json()).then(data => setPhotos(data)).catch(err => console.log(err));
-  }, [])
+    setLoading(true);
+    const category = categoryId ? `category=${categoryId}` : '';
+    fetch(`https://62fe7bf241165d66bfc10d04.mockapi.io/photos?page=${page}&limit=3&${category}`)
+    .then(response => response.json())
+    .then(data => setPhotos(data))
+    .catch(err => console.log(err))
+    .finally(() => setLoading(false));
+  }, [categoryId, page])
 
   return (
     <div className="App">
@@ -40,20 +47,21 @@ function App() {
       <div className="top">
         <ul className="tags">
           {
-            tagsArray.map((item, index) => <li className={ item === tag ? 'active' : ''} key={index} onClick={() => setTag(item)}>{item}</li>)
+            cats.map((item, index) => <li className={ index === categoryId ? 'active' : ''} key={index} onClick={() => setСategoryId(index)}>{item.name}</li>)
           }
         </ul>
         <input className="search-input" value={value} onBlur={() => setValue('')} onChange={(e) => setValue(e.target.value)} placeholder="Поиск по названию" />
       </div>
       <div className="content">
         {
-          photos.filter(item => item.name.toLowerCase().includes(value.toLowerCase() || (tag === 'Все' ? '' : tag.toLowerCase())))
+          isLoading ? <ImageLoader/> :
+          photos.filter(item => item.name.toLowerCase().includes(value.toLowerCase()))
           .map((item, index) => <Collection name={item.name} images={item.photos} key={index}/>)
         }
       </div>
       <ul className="pagination">
         {
-          pageArray.map(item => <li className={item === page ? 'active' : ''} key={item} onClick={() => setPage(item)}>{item}</li>)
+          [...Array(3)].map((_, index) => <li className={index + 1 === page ? 'active' : ''} key={index} onClick={() => setPage(index + 1)}>{index + 1}</li>)
         }
       </ul>
     </div>
